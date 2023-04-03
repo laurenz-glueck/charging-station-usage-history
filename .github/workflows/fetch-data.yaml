@@ -1,21 +1,22 @@
 name: Fetch charging station data
 
 on:
-  push:
   workflow_dispatch:
   schedule:
     - cron: '*/10 * * * *'
 
 jobs:
-  scheduled:
+  fetch-data:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out this repo
+      - name: Check out repo
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
       - name: Fetch latest data
         run: |-
           bash ./fetch-data.sh
-      - name: Commit and push if it changed
+      - name: Commit and push if data has changed
         run: |-
           git config user.name "Automated"
           git config user.email "actions@users.noreply.github.com"
