@@ -11,9 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out this repo
-        uses: actions/checkout@v2
-      - name: Install jq
-        run: sudo apt-get install -y jq
+        uses: actions/checkout@v3
       - name: Fetch latest data
         run: |-
           bash ./fetch-data.sh
