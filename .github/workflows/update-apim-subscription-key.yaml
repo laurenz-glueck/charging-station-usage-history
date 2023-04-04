@@ -19,7 +19,9 @@ jobs:
           APIM_SUBSCRIPTION_KEY=$(echo "$HTML" | grep -oE 'apimSubscriptionKey:[[:space:]]*"[^"]+"' | awk -F'"' '{print $2}')
           echo "::set-output name=apim_subscription_key::$APIM_SUBSCRIPTION_KEY"
       - name: Set GitHub Action Secret
-        uses: actions/secret@v2
+        uses: hmanzur/actions-set-secret@v2.0.0
         with:
-          name: APIM_SUBSCRIPTION_KEY
+          name: 'APIM_SUBSCRIPTION_KEY'
           value: ${{ steps.load-and-extract.outputs.apim_subscription_key }}
+          repository: hmanzur/actions-set-secret
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
