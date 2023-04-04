@@ -15,6 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+
       - name: Load and extract APIM subscription key
         id: load-and-extract
         run: |
@@ -22,9 +23,11 @@ jobs:
           HTML=$(curl -s "$URL")
           APIM_SUBSCRIPTION_KEY=$(echo "$HTML" | grep -oE 'apimSubscriptionKey:[[:space:]]*"[^"]+"' | awk -F'"' '{print $2}')
           echo "APIM_SUBSCRIPTION_KEY=$APIM_SUBSCRIPTION_KEY" >> $GITHUB_ENV
+
       - name: Fetch latest data
         run: |-
           bash ./fetch-data.sh
+
       - name: Commit and push if data has changed
         run: |-
           git config user.name "Automated"

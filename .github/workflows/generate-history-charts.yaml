@@ -1,0 +1,33 @@
+name: Generate History Charts
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "1 0 * * *"
+
+jobs:
+  generate-charts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip
+          pip3 install pygit2 matplotlib
+
+      - name: Generate charts
+        run: python3 generate-history-chart.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "Automated"
+          git config user.email "actions@users.noreply.github.com"
+          git add history-charts/*/*.png
+          timestamp=$(TZ='Europe/Berlin' date '+%d.%m.%Y %H:%M')
+          git commit -m "Latest data: ${timestamp}" || exit 0
+          git push
