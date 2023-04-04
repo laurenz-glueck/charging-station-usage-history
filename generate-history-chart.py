@@ -13,8 +13,11 @@ config = [
 repo = pygit2.Repository(repo_path)
 
 now = datetime.datetime.now()
-twenty_four_hours_ago = now - datetime.timedelta(hours=24)
-dateString = twenty_four_hours_ago.strftime("%Y-%m-%d")
+yesterday = now - datetime.timedelta(days=1)
+yesterday_start = datetime.datetime.combine(yesterday, datetime.time.min)
+yesterday_end = datetime.datetime.combine(yesterday, datetime.time.max) - datetime.timedelta(microseconds=1)
+
+dateString = yesterday.strftime("%Y-%m-%d")
 
 for cfg in config:
     name = cfg["name"]
@@ -24,9 +27,9 @@ for cfg in config:
     data = {}
 
     for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TIME):
-        if commit.commit_time < twenty_four_hours_ago.timestamp():
+        if commit.commit_time < yesterday_start.timestamp():
             break
-        if file_path in commit.tree:
+        if (yesterday_start.timestamp() <= commit.commit_time <= yesterday_end.timestamp()) and file_path in commit.tree:
             blob = repo[commit.tree[file_path].id]
             content = blob.data.decode('utf-8')
             values = json.loads(content)
@@ -60,6 +63,6 @@ for cfg in config:
         plt.text(i, v+0.02, str(v), color='black', ha='center')
 
     plt.yticks(range(3))
-
+    plt.xticks(rotation=90)
     plt.savefig('history-charts/' + name + '/' + dateString + '.png')
     plt.clf()
