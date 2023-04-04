@@ -29,6 +29,8 @@ for station in "${stations[@]}"; do
   if [ $? -ne 0 ]; then
     echo "Error: Failed to fetch data for station $stationId"
     exit 1
+  else
+    echo "Successfully fetched data for station $stationId"
   fi
 
   # Extract the required fields from the response using jq and store in a JSON object
@@ -38,6 +40,8 @@ for station in "${stations[@]}"; do
   if [ -z "$json" ]; then
     echo "Error: Required fields not found in response for station $stationId"
     exit 1
+  else
+    echo "Successfully extracted data for station $stationId: availableChargePoints: $(echo $json | jq -r '.availableChargePoints'), numberOfChargePoints: $(echo $json | jq -r '.numberOfChargePoints')"
   fi
 
   # Write the JSON object to a file with the stationName as the filename
