@@ -1,0 +1,25 @@
+name: Update APIM subscription key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  update_apim_subscription_key:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+      - name: Load and extract APIM subscription key
+        id: load-and-extract
+        run: |
+          URL="https://www.enbw.com/elektromobilitaet/produkte/mobilityplus-app/ladestation-finden/map"
+          HTML=$(curl -s "$URL")
+          APIM_SUBSCRIPTION_KEY=$(echo "$HTML" | grep -oE 'apimSubscriptionKey:[[:space:]]*"[^"]+"' | awk -F'"' '{print $2}')
+          echo "::set-output name=apim_subscription_key::$APIM_SUBSCRIPTION_KEY"
+      - name: Set GitHub Action Secret
+        uses: actions/secret@v2
+        with:
+          name: APIM_SUBSCRIPTION_KEY
+          value: ${{ steps.load-and-extract.outputs.apim_subscription_key }}
