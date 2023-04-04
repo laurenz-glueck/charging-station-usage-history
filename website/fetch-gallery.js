@@ -15,10 +15,12 @@ function fetchGallery(folderName) {
 
 				const chartCard = `
                     <div class="col">
-                        <div class="card">
+                        <div class="card text-center">
+                        	<div class="card-body">
+								<h5>${chartName}</h5>
+							</div>
                             <img src="${imageSrc}" class="card-img-top" alt="${chartName}">
                             <div class="card-body">
-                                <h5 class="card-title">${chartName}</h5>
                                 <a href="${imageSrc}" class="btn btn-primary" target="_blank">View full size</a>
                             </div>
                         </div>
