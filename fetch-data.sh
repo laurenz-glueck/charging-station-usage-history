@@ -7,6 +7,9 @@ stations=(
   '{ "stationName": "bahnhofsplatz", "stationId": 266295 }'
 )
 
+# Fetch the APIM subscription key from the environment variable
+apim_subscription_key=$APIM_SUBSCRIPTION_KEY
+
 # Loop over the array of stations and fetch the API endpoint for each station
 for station in "${stations[@]}"; do
   stationId=$(echo $station | jq -r '.stationId')
@@ -18,7 +21,7 @@ for station in "${stations[@]}"; do
   --header 'Accept-Language: de' \
   --header 'Cache-Control: no-cache' \
   --header 'Connection: keep-alive' \
-  --header 'Ocp-Apim-Subscription-Key: d4954e8b2e444fc89a89a463788c0a72' \
+  --header "Ocp-Apim-Subscription-Key: $apim_subscription_key" \
   --header 'Origin: https://www.enbw.com' \
   --header 'Pragma: no-cache' \
   --header 'Referer: https://www.enbw.com/' \
