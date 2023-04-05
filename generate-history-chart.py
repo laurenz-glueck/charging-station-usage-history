@@ -22,8 +22,8 @@ config = [
 
 repo = pygit2.Repository(repo_path)
 
-now_utc = datetime.datetime.now(pytz.utc)
-now = now_utc.astimezone(pytz.timezone('Europe/Berlin'))
+berlin_tz = pytz.timezone('Europe/Berlin')
+now = datetime.datetime.now(berlin_tz)
 yesterday = now - datetime.timedelta(days=1)
 
 berlin_tz = pytz.timezone('Europe/Berlin')
