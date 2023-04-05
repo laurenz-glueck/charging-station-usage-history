@@ -22,7 +22,8 @@ config = [
 
 repo = pygit2.Repository(repo_path)
 
-now = datetime.datetime.now(pytz.timezone('Europe/Berlin'))
+now_utc = datetime.datetime.now(pytz.utc)
+now = now_utc.astimezone(pytz.timezone('Europe/Berlin'))
 yesterday = now - datetime.timedelta(days=1)
 yesterday_start = datetime.datetime.combine(yesterday, datetime.time.min).astimezone(pytz.utc)
 yesterday_end = datetime.datetime.combine(yesterday, datetime.time.max).astimezone(pytz.utc) - datetime.timedelta(microseconds=1)
