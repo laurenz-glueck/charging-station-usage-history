@@ -2,6 +2,16 @@ import pygit2
 import json
 import datetime
 import matplotlib.pyplot as plt
+import pytz
+
+def get_last_commit_before_timestamp(repo, file_path, timestamp):
+    for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TIME):
+        if commit.commit_time < timestamp:
+            if file_path in commit.tree:
+                blob = repo[commit.tree[file_path].id]
+                content = blob.data.decode('utf-8')
+                return json.loads(content)
+    return None
 
 repo_path = '.'
 config = [
@@ -12,19 +22,25 @@ config = [
 
 repo = pygit2.Repository(repo_path)
 
-now = datetime.datetime.now()
+now = datetime.datetime.now(pytz.timezone('Europe/Berlin'))
 yesterday = now - datetime.timedelta(days=1)
-yesterday_start = datetime.datetime.combine(yesterday, datetime.time.min)
-yesterday_end = datetime.datetime.combine(yesterday, datetime.time.max) - datetime.timedelta(microseconds=1)
+yesterday_start = datetime.datetime.combine(yesterday, datetime.time.min).astimezone(pytz.utc)
+yesterday_end = datetime.datetime.combine(yesterday, datetime.time.max).astimezone(pytz.utc) - datetime.timedelta(microseconds=1)
 
 dateString = yesterday.strftime("%Y-%m-%d")
+
+berlin_tz = pytz.timezone('Europe/Berlin')
 
 for cfg in config:
     name = cfg["name"]
     displayName = cfg["displayName"]
     file_path = cfg["filePath"]
 
-    data = {}
+    data = {"availableChargePoints": {}}
+
+    prev_day_value = get_last_commit_before_timestamp(repo, file_path, yesterday_start.timestamp())
+    if prev_day_value is not None:
+        data["availableChargePoints"] = {hour.astimezone(berlin_tz): [prev_day_value["availableChargePoints"]] for hour in [yesterday_start + datetime.timedelta(hours=i) for i in range(24)]}
 
     for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TIME):
         if commit.commit_time < yesterday_start.timestamp():
@@ -36,11 +52,17 @@ for cfg in config:
             for key, value in values.items():
                 if key not in data:
                     data[key] = {}
-                timestamp = datetime.datetime.fromtimestamp(commit.commit_time)
+                timestamp = datetime.datetime.fromtimestamp(commit.commit_time, berlin_tz)
                 hour = timestamp.replace(minute=0, second=0, microsecond=0)
-                if hour not in data[key]:
-                    data[key][hour] = []
-                data[key][hour].append(value)
+                data[key][hour] = [value]
+
+    prev_value = prev_day_value["availableChargePoints"] if prev_day_value is not None else 0
+    for hour in [yesterday_start + datetime.timedelta(hours=i) for i in range(24)]:
+        hour_berlin = hour.astimezone(berlin_tz)
+        if hour_berlin not in data["availableChargePoints"]:
+            data["availableChargePoints"][hour_berlin] = [prev_value]
+        else:
+            prev_value = int(round(sum(data["availableChargePoints"][hour_berlin]) / len(data["availableChargePoints"][hour_berlin])))
 
     x = []
     y = []
