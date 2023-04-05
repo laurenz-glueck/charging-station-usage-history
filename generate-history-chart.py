@@ -25,8 +25,13 @@ repo = pygit2.Repository(repo_path)
 now_utc = datetime.datetime.now(pytz.utc)
 now = now_utc.astimezone(pytz.timezone('Europe/Berlin'))
 yesterday = now - datetime.timedelta(days=1)
-yesterday_start = datetime.datetime.combine(yesterday, datetime.time.min).astimezone(pytz.utc)
-yesterday_end = datetime.datetime.combine(yesterday, datetime.time.max).astimezone(pytz.utc) - datetime.timedelta(microseconds=1)
+
+berlin_tz = pytz.timezone('Europe/Berlin')
+
+yesterday_start_berlin = datetime.datetime.combine(yesterday, datetime.time.min).astimezone(berlin_tz)
+yesterday_end_berlin = datetime.datetime.combine(yesterday, datetime.time.max).astimezone(berlin_tz) - datetime.timedelta(microseconds=1)
+yesterday_start = yesterday_start_berlin.astimezone(pytz.utc)
+yesterday_end = yesterday_end_berlin.astimezone(pytz.utc)
 
 dateString = yesterday.strftime("%Y-%m-%d")
 
@@ -74,7 +79,8 @@ for cfg in config:
             average = int(round(sum(values) / len(values)))
         else:
             average = 0
-        x.append(hour.strftime("%H:%M"))
+        hour_utc = hour.astimezone(pytz.utc)
+        x.append(hour_utc.strftime("%H:%M"))
         y.append(average)
 
     plt.bar(x, y, align='center')
