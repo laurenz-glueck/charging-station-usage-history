@@ -42,12 +42,17 @@ for cfg in config:
     displayName = cfg["displayName"]
     file_path = cfg["filePath"]
 
-    data = {"availableChargePoints": {}}
-
     prev_day_value = get_last_commit_before_timestamp(repo, file_path, yesterday_start.timestamp())
-    if prev_day_value is not None:
-        data["availableChargePoints"] = {hour.astimezone(berlin_tz): [prev_day_value["availableChargePoints"]] for hour in [yesterday_start + datetime.timedelta(hours=i) for i in range(24)]}
 
+    if prev_day_value is not None:
+        prev_day_available_charge_points = prev_day_value["availableChargePoints"]
+    else:
+        prev_day_available_charge_points = 0
+
+    timestamps = [yesterday_start_berlin]
+    y = [prev_day_available_charge_points]
+
+    prev_value = prev_day_available_charge_points
     for commit in repo.walk(repo.head.target, pygit2.GIT_SORT_TIME):
         if commit.commit_time < yesterday_start.timestamp():
             break
@@ -55,36 +60,23 @@ for cfg in config:
             blob = repo[commit.tree[file_path].id]
             content = blob.data.decode('utf-8')
             values = json.loads(content)
-            for key, value in values.items():
-                if key not in data:
-                    data[key] = {}
-                timestamp = datetime.datetime.fromtimestamp(commit.commit_time, berlin_tz)
-                hour = timestamp.replace(minute=0, second=0, microsecond=0)
-                data[key][hour] = [value]
+            timestamp = datetime.datetime.fromtimestamp(commit.commit_time, berlin_tz)
 
-    prev_value = prev_day_value["availableChargePoints"] if prev_day_value is not None else 0
-    for hour in [yesterday_start + datetime.timedelta(hours=i) for i in range(24)]:
-        hour_berlin = hour.astimezone(berlin_tz)
-        if hour_berlin not in data["availableChargePoints"]:
-            data["availableChargePoints"][hour_berlin] = [prev_value]
-        else:
-            prev_value = int(round(sum(data["availableChargePoints"][hour_berlin]) / len(data["availableChargePoints"][hour_berlin])))
+            if "availableChargePoints" in values and values["availableChargePoints"] != prev_value:
+                timestamps.append(timestamp)
+                y.append(values["availableChargePoints"])
+                prev_value = values["availableChargePoints"]
 
-    x = []
-    y = []
+    timestamps_y_values = list(zip(timestamps, y))
+    timestamps_y_values.append((yesterday_end_berlin, prev_value))
+    timestamps_y_values.sort()
 
-    for hour in sorted(data['availableChargePoints']):
-        values = data['availableChargePoints'][hour]
-        if values:
-            average = int(round(sum(values) / len(values)))
-        else:
-            average = 0
-        hour_utc = hour.astimezone(pytz.utc)
-        x.append(hour_utc.strftime("%H:%M"))
-        y.append(average)
+    timestamps, y = zip(*timestamps_y_values)
 
-    plt.bar(x, y, align='center')
-    plt.xlabel('Hour')
+    x_labels = [t.strftime('%H:%M') for t in timestamps]
+
+    plt.bar(x_labels, y, align='center')
+    plt.xlabel('Time')
     plt.ylabel('Available Charge Points')
     plt.title('Charge Point Availability "' + displayName + '" on ' + dateString)
 
@@ -95,3 +87,4 @@ for cfg in config:
     plt.xticks(rotation=90)
     plt.savefig('history-charts/' + name + '/' + dateString + '.png')
     plt.clf()
+
