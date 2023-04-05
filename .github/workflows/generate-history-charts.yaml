@@ -31,6 +31,8 @@ jobs:
           pip3 install pygit2 matplotlib
 
       - name: Generate charts
+        env:
+          TZ: Europe/Berlin
         run: python3 generate-history-chart.py
 
       - name: Commit and push
