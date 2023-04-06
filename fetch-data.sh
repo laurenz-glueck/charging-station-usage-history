@@ -7,8 +7,18 @@ stations=(
   '{ "stationName": "bahnhofsplatz", "stationId": 266295 }'
 )
 
-# Fetch the APIM subscription key from the environment variable
-apim_subscription_key=$APIM_SUBSCRIPTION_KEY
+# fetch APIM subscription key
+apimKeyHost="https://www.enbw.com/elektromobilitaet/produkte/mobilityplus-app/ladestation-finden/map"
+apimKeyResult=$(curl -s "apimKeyHost")
+apim_subscription_key=$(echo "$apimKeyResult" | grep -oE 'apimSubscriptionKey:[[:space:]]*"[^"]+"' | awk -F'"' '{print $2}')
+
+# Check if the APIM subscription key was found
+if [ -z "$apim_subscription_key" ]; then
+  echo "Error: Failed to fetch APIM subscription key. Using fallback..."
+  apim_subscription_key="d4954e8b2e444fc89a89a463788c0a72"
+else
+  echo "Successfully fetched APIM subscription key: $apim_subscription_key"
+fi
 
 # Loop over the array of stations and fetch the API endpoint for each station
 for station in "${stations[@]}"; do
