@@ -1,44 +1,44 @@
 name: Generate History Charts
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: "1 0 * * *"
+    workflow_dispatch:
+    schedule:
+        -   cron: "1 0 * * *"
 
 jobs:
-  generate-charts:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
-          ref: 'main'
-          fetch-depth: '0'
+    generate-charts:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout repo
+                uses: actions/checkout@v4
+                with:
+                    token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+                    ref: 'main'
+                    fetch-depth: '0'
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
+            -   name: Cache dependencies
+                uses: actions/cache@v4
+                with:
+                    path: ~/.cache/pip
+                    key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+                    restore-keys: |
+                        ${{ runner.os }}-pip-
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip
-          pip3 install pygit2 matplotlib
+            -   name: Install dependencies
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install -y python3 python3-pip
+                    pip3 install pygit2 matplotlib
 
-      - name: Generate charts
-        env:
-          TZ: Europe/Berlin
-        run: python3 generate-history-chart.py
+            -   name: Generate charts
+                env:
+                    TZ: Europe/Berlin
+                run: python3 generate-history-chart.py
 
-      - name: Commit and push
-        run: |
-          git config user.name "Automated"
-          git config user.email "actions@users.noreply.github.com"
-          git add history-charts/*/*.png
-          git commit -m "Generated daily history charts" || exit 0
-          git push
+            -   name: Commit and push
+                run: |
+                    git config user.name "Automated"
+                    git config user.email "actions@users.noreply.github.com"
+                    git add history-charts/*/*.png
+                    git commit -m "Generated daily history charts" || exit 0
+                    git push

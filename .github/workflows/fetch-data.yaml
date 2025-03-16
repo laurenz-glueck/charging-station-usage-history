@@ -1,32 +1,32 @@
 name: Fetch charging station data
 
 on:
-  workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
+    workflow_dispatch:
+    schedule:
+        -   cron: '*/5 * * * *'
 
 jobs:
-  fetch-data:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
+    fetch-data:
+        runs-on: ubuntu-latest
+        steps:
+            -   name: Checkout repo
+                uses: actions/checkout@v4
+                with:
+                    token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
 
-      - name: Fetch latest data
-        env:
-          WIRELANE_USERNAME: ${{ secrets.WIRELANE_USERNAME }}
-          WIRELANE_PASSWORD: ${{ secrets.WIRELANE_PASSWORD }}
-          WIRELANE_AUTH_TOKEN: ${{ secrets.WIRELANE_AUTH_TOKEN }}
-        run: |-
-          bash ./fetch-data-wirelane.sh
+            -   name: Fetch latest data
+                env:
+                    WIRELANE_USERNAME: ${{ secrets.WIRELANE_USERNAME }}
+                    WIRELANE_PASSWORD: ${{ secrets.WIRELANE_PASSWORD }}
+                    WIRELANE_AUTH_TOKEN: ${{ secrets.WIRELANE_AUTH_TOKEN }}
+                run: |-
+                    bash ./fetch-data-wirelane.sh
 
-      - name: Commit and push if data has changed
-        run: |-
-          git config user.name "Automated"
-          git config user.email "actions@users.noreply.github.com"
-          git add -A
-          timestamp=$(TZ='Europe/Berlin' date '+%d.%m.%Y %H:%M')
-          git commit -m "Latest data: ${timestamp}" || exit 0
-          git push
+            -   name: Commit and push if data has changed
+                run: |-
+                    git config user.name "Automated"
+                    git config user.email "actions@users.noreply.github.com"
+                    git add -A
+                    timestamp=$(TZ='Europe/Berlin' date '+%d.%m.%Y %H:%M')
+                    git commit -m "Latest data: ${timestamp}" || exit 0
+                    git push
