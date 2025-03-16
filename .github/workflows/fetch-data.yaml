@@ -15,8 +15,12 @@ jobs:
           token: ${{ secrets.WORKFLOW_ACCESS_TOKEN }}
 
       - name: Fetch latest data
+        env:
+          WIRELANE_USERNAME: ${{ secrets.WIRELANE_USERNAME }}
+          WIRELANE_PASSWORD: ${{ secrets.WIRELANE_PASSWORD }}
+          WIRELANE_AUTH_TOKEN: ${{ secrets.WIRELANE_AUTH_TOKEN }}
         run: |-
-          bash ./fetch-data.sh
+          bash ./fetch-data-wirelane.sh
 
       - name: Commit and push if data has changed
         run: |-
