@@ -18,6 +18,7 @@ config = [
     {"name": "bahnhofsplatz", "displayName": "Bahnhofsplatz", "filePath": "history-data/history--bahnhofsplatz.json"},
     {"name": "hausen-1", "displayName": "Hausen 1", "filePath": "history-data/history--hausen-1.json"},
     {"name": "hausen-2", "displayName": "Hausen 2", "filePath": "history-data/history--hausen-2.json"}
+    {"name": "mittelschule", "displayName": "Mittelschule", "filePath": "history-data/history--mittelschule.json"}
 ]
 
 repo = pygit2.Repository(repo_path)
