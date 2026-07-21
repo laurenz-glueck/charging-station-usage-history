@@ -22,7 +22,10 @@ jobs:
                 run: |-
                     bash ./fetch-data-wirelane.sh
 
+            # Runs even when the fetch step failed, so that partial results are still
+            # recorded while a stale EVSE ID keeps the run visibly red.
             -   name: Commit and push if data has changed
+                if: always()
                 run: |-
                     git config user.name "Automated"
                     git config user.email "actions@users.noreply.github.com"

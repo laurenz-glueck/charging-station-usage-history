@@ -84,7 +84,7 @@ for cfg in config:
     for i, v in enumerate(y):
         plt.text(i, v+0.02, str(v), color='black', ha='center')
 
-    plt.yticks(range(3))
+    plt.yticks(range(max(y) + 2))
     plt.xticks(rotation=90)
     plt.savefig('history-charts/' + name + '/' + dateString + '.png')
     plt.clf()
